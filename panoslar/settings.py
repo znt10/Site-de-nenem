@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from panoslar.storage import MinIOMediaStorage  # noqa: E402 – imported after env is ready
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
     'loja',
 ]
 
@@ -148,15 +151,34 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     'default': {
-        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        'BACKEND': 'panoslar.storage.MinIOMediaStorage',
     },
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
 }
 
+# ---------------------------------------------------------------------------
+# MinIO / S3-compatible object storage
+# ---------------------------------------------------------------------------
+# boto3 / django-storages read these standard AWS_* names automatically.
+AWS_S3_ENDPOINT_URL = os.environ.get('MINIO_ENDPOINT', '')
+AWS_ACCESS_KEY_ID = os.environ.get('MINIO_ACCESS_KEY', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('MINIO_SECRET_KEY', '')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('MINIO_BUCKET_NAME', 'media')
+AWS_S3_REGION_NAME = 'us-east-1'          # MinIO default region
+AWS_S3_SIGNATURE_VERSION = 's3v4'         # required by MinIO
+AWS_S3_USE_SSL = False                     # plain HTTP on the private network
+AWS_S3_ADDRESSING_STYLE = 'path'          # path-style URLs (MinIO requirement)
+AWS_QUERYSTRING_AUTH = False              # serve files without signed URLs
+AWS_S3_FILE_OVERWRITE = True              # overwrite on re-upload keeps URLs stable
+
 # Media files (uploads do usuário)
-MEDIA_URL = 'media/'
+# MEDIA_URL points to the MinIO endpoint so that img.url works in templates.
+# MEDIA_ROOT is kept for local fallback / management commands.
+_minio_endpoint = os.environ.get('MINIO_ENDPOINT', '').rstrip('/')
+_minio_bucket = os.environ.get('MINIO_BUCKET_NAME', 'media')
+MEDIA_URL = f'{_minio_endpoint}/{_minio_bucket}/' if _minio_endpoint else 'media/'
 MEDIA_ROOT = DATA_DIR / 'media'
 
 # Configurações da loja
