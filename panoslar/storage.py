@@ -14,45 +14,45 @@ class MinIOMediaStorage(S3Boto3Storage):
       - MINIO_BUCKET_NAME   Target bucket name
 
     Files are uploaded to the ``produtos/`` prefix (matching the
-    ImageField's upload_to) and served via the same endpoint so that
-    Django can generate working URLs for the web interface.
+    ImageField's upload_to='produtos/') and served via the same
+    endpoint so that Django can generate working URLs for the web
+    interface.
     """
 
-    # Bucket & auth — pulled from env vars at class-definition time so
-    # that Django's app-registry startup picks them up correctly.
-    bucket_name = os.environ.get("MINIO_BUCKET_NAME", "media")
-    access_key = os.environ.get("MINIO_ACCESS_KEY", "")
-    secret_key = os.environ.get("MINIO_SECRET_KEY", "")
+    def __init__(self, **kwargs):
+        kwargs.setdefault("bucket_name", os.environ.get("MINIO_BUCKET_NAME", "media"))
+        kwargs.setdefault("access_key", os.environ.get("MINIO_ACCESS_KEY", ""))
+        kwargs.setdefault("secret_key", os.environ.get("MINIO_SECRET_KEY", ""))
 
-    # Internal (private) MinIO endpoint used for both uploads and URL
-    # generation.  The value must include the scheme, e.g.
-    # "http://minio.railway.internal:9000".
-    endpoint_url = os.environ.get("MINIO_ENDPOINT", "")
+        # Internal (private) MinIO endpoint — must include the scheme,
+        # e.g. "http://minio.railway.internal:9000".
+        kwargs.setdefault("endpoint_url", os.environ.get("MINIO_ENDPOINT", ""))
 
-    # MinIO works best with path-style addressing (bucket in the URL
-    # path rather than as a subdomain).
-    addressing_style = "path"
+        # MinIO works best with path-style addressing (bucket in the URL
+        # path rather than as a subdomain).
+        kwargs.setdefault("addressing_style", "path")
 
-    # Use AWS Signature Version 4, which MinIO requires.
-    signature_version = "s3v4"
+        # Use AWS Signature Version 4, which MinIO requires.
+        kwargs.setdefault("signature_version", "s3v4")
 
-    # MinIO's default region identifier.
-    region_name = "us-east-1"
+        # MinIO's default region identifier.
+        kwargs.setdefault("region_name", "us-east-1")
 
-    # The private endpoint is typically plain HTTP inside Railway's
-    # internal network.
-    use_ssl = False
+        # The private endpoint is typically plain HTTP inside Railway's
+        # internal network.
+        kwargs.setdefault("use_ssl", False)
 
-    # Let django-storages / boto3 set the Content-Type header
-    # automatically based on the file extension.
-    object_parameters = {
-        "ContentType": "image/jpeg",
-    }
+        # Do not append query-string auth tokens to URLs; the bucket
+        # should be publicly readable (or access controlled at the
+        # MinIO level).
+        kwargs.setdefault("querystring_auth", False)
 
-    # Do not append query-string auth tokens to URLs; the bucket should
-    # be publicly readable (or access controlled at the MinIO level).
-    querystring_auth = False
+        # Overwrite files with the same name instead of appending a
+        # suffix, which keeps URLs stable when an image is re-uploaded.
+        kwargs.setdefault("file_overwrite", True)
 
-    # Overwrite files with the same name instead of appending a suffix,
-    # which keeps URLs stable when an image is re-uploaded.
-    file_overwrite = True
+        # Upload files under the ``produtos/`` prefix to match the
+        # ImageField's upload_to='produtos/' declaration.
+        kwargs.setdefault("location", "produtos/")
+
+        super().__init__(**kwargs)
