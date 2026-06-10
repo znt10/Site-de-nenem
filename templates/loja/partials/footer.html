@@ -1,0 +1,29 @@
+{% load whatsapp_tags %}
+<footer class="bg-brand-900 text-brand-50 mt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+            <h3 class="font-display font-bold text-lg mb-3">{{ NOME_LOJA }}</h3>
+            <p class="text-brand-200 text-sm leading-relaxed">
+                Panos de chão, pia, mesa e cama com qualidade, durabilidade e o melhor custo-benefício para sua casa.
+            </p>
+        </div>
+        <div>
+            <h3 class="font-display font-bold text-lg mb-3">Categorias</h3>
+            <ul class="space-y-2 text-sm text-brand-200">
+                {% for categoria in categorias_footer %}
+                <li><a href="{% url 'loja:produto_lista' %}?categoria={{ categoria.slug }}" class="hover:text-white transition">{{ categoria.nome }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            <h3 class="font-display font-bold text-lg mb-3">Atendimento</h3>
+            <p class="text-brand-200 text-sm mb-4">Tire suas dúvidas e faça seu pedido diretamente pelo WhatsApp.</p>
+            <a href="{% whatsapp_link_geral request %}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-full transition">
+                Chamar no WhatsApp
+            </a>
+        </div>
+    </div>
+    <div class="border-t border-brand-800 py-4 text-center text-xs text-brand-300">
+        &copy; {% now "Y" %} {{ NOME_LOJA }}. Todos os direitos reservados.
+    </div>
+</footer>

@@ -1,0 +1,74 @@
+{% extends 'loja/base.html' %}
+
+{% block title %}{{ NOME_LOJA }} - Panos para sua casa{% endblock %}
+
+{% block content %}
+
+<!-- Categorias -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-10">
+        <h2 class="font-display font-bold text-3xl sm:text-4xl mb-3">Nossas Categorias</h2>
+        <p class="text-brand-500">Encontre exatamente o que você precisa</p>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+        {% for categoria in categorias %}
+        <a href="{% url 'loja:produto_lista' %}?categoria={{ categoria.slug }}"
+           class="group bg-white border border-brand-100 rounded-2xl p-6 text-center shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="text-4xl mb-3 transition-transform group-hover:scale-110">
+                {% if 'chao' in categoria.slug %}🧹
+                {% elif 'pia' in categoria.slug %}🍽️
+                {% elif 'mesa' in categoria.slug %}🪑
+                {% elif 'cama' in categoria.slug %}🛏️
+                {% else %}🧺{% endif %}
+            </div>
+            <h3 class="font-display font-semibold text-brand-800 group-hover:text-brand-600 transition">{{ categoria.nome }}</h3>
+        </a>
+        {% empty %}
+        <p class="col-span-full text-center text-brand-400">Nenhuma categoria cadastrada ainda.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Produtos em destaque -->
+{% if destaques %}
+<section class="bg-white py-16 border-y border-brand-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between mb-10 flex-wrap gap-4">
+            <div>
+                <h2 class="font-display font-bold text-3xl sm:text-4xl mb-2">Produtos em Destaque</h2>
+                <p class="text-brand-500">Os preferidos dos nossos clientes</p>
+            </div>
+            <a href="{% url 'loja:produto_lista' %}" class="text-brand-600 font-semibold hover:text-brand-700 transition">Ver todos &rarr;</a>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {% for produto in destaques %}
+                {% include 'loja/partials/produto_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Novidades -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="flex items-end justify-between mb-10 flex-wrap gap-4">
+        <div>
+            <h2 class="font-display font-bold text-3xl sm:text-4xl mb-2">Novidades</h2>
+            <p class="text-brand-500">Acabaram de chegar</p>
+        </div>
+        <a href="{% url 'loja:produto_lista' %}" class="text-brand-600 font-semibold hover:text-brand-700 transition">Ver todos &rarr;</a>
+    </div>
+    {% if novidades %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for produto in novidades %}
+            {% include 'loja/partials/produto_card.html' %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16 bg-white rounded-2xl border border-dashed border-brand-200">
+        <p class="text-brand-400 text-lg">Nenhum produto cadastrado ainda. Volte em breve! 🧺</p>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}
