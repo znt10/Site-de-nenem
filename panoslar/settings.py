@@ -174,11 +174,13 @@ AWS_QUERYSTRING_AUTH = False              # serve files without signed URLs
 AWS_S3_FILE_OVERWRITE = True              # overwrite on re-upload keeps URLs stable
 
 # Media files (uploads do usuário)
-# MEDIA_URL points to the MinIO endpoint so that img.url works in templates.
+# MEDIA_URL points to the public MinIO endpoint so that image URLs generated
+# by img.url are reachable by browsers.  The storage backend continues to use
+# MINIO_ENDPOINT (private) for uploads — fast internal communication.
 # MEDIA_ROOT is kept for local fallback / management commands.
-_minio_endpoint = os.environ.get('MINIO_ENDPOINT', '').rstrip('/')
+_minio_public_endpoint = os.environ.get('MINIO_PUBLIC_ENDPOINT', '').rstrip('/')
 _minio_bucket = os.environ.get('MINIO_BUCKET_NAME', 'media')
-MEDIA_URL = f'{_minio_endpoint}/{_minio_bucket}/' if _minio_endpoint else 'media/'
+MEDIA_URL = f'{_minio_public_endpoint}/{_minio_bucket}/' if _minio_public_endpoint else 'media/'
 MEDIA_ROOT = DATA_DIR / 'media'
 
 # Configurações da loja
