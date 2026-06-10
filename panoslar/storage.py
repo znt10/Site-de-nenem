@@ -13,10 +13,10 @@ class MinIOMediaStorage(S3Boto3Storage):
       - MINIO_SECRET_KEY    MinIO secret key / password
       - MINIO_BUCKET_NAME   Target bucket name
 
-    Files are stored under the path determined by each model field's
-    ``upload_to`` argument and served via the same endpoint so that
-    Django can generate working URLs for the web interface.
-
+    Files are served via the same endpoint so that Django can generate
+    working URLs for the web interface. The upload path prefix is
+    determined solely by each ImageField's ``upload_to`` argument —
+    no ``location`` is set here to avoid duplicating the prefix.
     """
 
     def __init__(self, **kwargs):
