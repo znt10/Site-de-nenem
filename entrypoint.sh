@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+mkdir -p "${DATA_DIR:-/app}/media/produtos"
+
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 

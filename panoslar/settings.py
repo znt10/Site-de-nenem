@@ -30,6 +30,14 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{h}' for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')
+]
+
+# Diretório para dados persistentes (banco de dados e mídia).
+# Em produção (Railway), aponte DATA_DIR para o caminho do volume montado.
+DATA_DIR = Path(os.environ.get('DATA_DIR', BASE_DIR))
+
 
 # Application definition
 
@@ -80,12 +88,25 @@ WSGI_APPLICATION = 'panoslar.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get('MYSQLHOST') or os.environ.get('DB_HOST'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'railway')),
+            'USER': os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root')),
+            'PASSWORD': os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', '')),
+            'HOST': os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', '127.0.0.1')),
+            'PORT': os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', '3306')),
+            'OPTIONS': {'charset': 'utf8mb4'},
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': DATA_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -136,7 +157,7 @@ STORAGES = {
 
 # Media files (uploads do usuário)
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = DATA_DIR / 'media'
 
 # Configurações da loja
 WHATSAPP_NUMERO = os.environ.get('WHATSAPP_NUMERO', '5583982217869')  # DDI+DDD+numero

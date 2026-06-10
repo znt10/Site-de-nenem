@@ -1,3 +1,4 @@
+{% load static %}
 {% load whatsapp_tags %}
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -6,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ NOME_LOJA }}{% endblock %}</title>
     <meta name="description" content="Panos de chão, pia, mesa e cama com qualidade e preço justo. Faça seu pedido pelo WhatsApp.">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,16 +24,16 @@
                     },
                     colors: {
                         brand: {
-                            50: '#f3faf3',
-                            100: '#e0f5e3',
-                            200: '#c2eac8',
-                            300: '#97d8a3',
-                            400: '#68bf78',
-                            500: '#46a259',
-                            600: '#358247',
-                            700: '#2c673b',
-                            800: '#265231',
-                            900: '#1f4329',
+                            50: '#f7f5fc',
+                            100: '#ede7f9',
+                            200: '#dbd0f3',
+                            300: '#c2aeea',
+                            400: '#a785dd',
+                            500: '#8c63ce',
+                            600: '#7549b8',
+                            700: '#603c97',
+                            800: '#4d3179',
+                            900: '#3f2a63',
                         },
                     },
                     animation: {

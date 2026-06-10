@@ -3,6 +3,7 @@ Django==6.0.6
 django-admin-interface==0.32.0
 django-colorfield==0.14.0
 gunicorn==26.0.0
+mysqlclient==2.2.8
 packaging==26.2
 pillow==12.2.0
 python-slugify==8.0.4
