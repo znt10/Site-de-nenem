@@ -162,7 +162,11 @@ STORAGES = {
 # MinIO / S3-compatible object storage
 # ---------------------------------------------------------------------------
 # boto3 / django-storages read these standard AWS_* names automatically.
-AWS_S3_ENDPOINT_URL = os.environ.get('MINIO_ENDPOINT', '')
+# NOTE: AWS_S3_ENDPOINT_URL is intentionally NOT set here.  Setting it
+# globally would cause boto3 to generate image URLs pointing at the private
+# internal endpoint (MINIO_ENDPOINT), which browsers cannot reach.  Instead,
+# MinIOMediaStorage sets endpoint_url to the private endpoint only for the
+# upload connection, and uses custom_domain for public URL generation.
 AWS_ACCESS_KEY_ID = os.environ.get('MINIO_ACCESS_KEY', '')
 AWS_SECRET_ACCESS_KEY = os.environ.get('MINIO_SECRET_KEY', '')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('MINIO_BUCKET_NAME', 'media')
