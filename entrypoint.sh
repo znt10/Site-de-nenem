@@ -5,6 +5,7 @@ mkdir -p "${DATA_DIR:-/app}/media/produtos"
 
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
+python manage.py create_minio_bucket
 
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
     python manage.py shell -c "
