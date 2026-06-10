@@ -151,12 +151,19 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     'default': {
-        'BACKEND': 'panoslar.storage.MinIOMediaStorage',
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
 }
+
+# Usa o MinIO apenas quando configurado (ex: produção no Railway).
+# Sem MINIO_ENDPOINT, os uploads continuam indo para MEDIA_ROOT (disco local).
+if os.environ.get('MINIO_ENDPOINT'):
+    STORAGES['default'] = {
+        'BACKEND': 'panoslar.storage.MinIOMediaStorage',
+    }
 
 # ---------------------------------------------------------------------------
 # MinIO / S3-compatible object storage
