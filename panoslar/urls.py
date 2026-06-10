@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('loja.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve os arquivos de media (fotos dos produtos) tanto em desenvolvimento
+# quanto em produção, já que este projeto não usa um servidor separado para isso.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
