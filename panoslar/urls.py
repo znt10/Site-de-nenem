@@ -15,16 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('loja.urls')),
 ]
 
-# Serve os arquivos de media (fotos dos produtos) tanto em desenvolvimento
-# quanto em produção, já que este projeto não usa um servidor separado para isso.
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve os arquivos de media (fotos dos produtos) localmente, tanto em
+# desenvolvimento quanto em produção sem MinIO. static() do Django só
+# funciona com DEBUG=True, por isso usamos a view serve diretamente.
+# Quando MEDIA_URL aponta para um host externo (MinIO), essa rota nunca é usada.
+if '://' not in settings.MEDIA_URL:
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
