@@ -13,10 +13,10 @@ class MinIOMediaStorage(S3Boto3Storage):
       - MINIO_SECRET_KEY    MinIO secret key / password
       - MINIO_BUCKET_NAME   Target bucket name
 
-    Files are uploaded to the ``produtos/`` prefix (matching the
-    ImageField's upload_to='produtos/') and served via the same
-    endpoint so that Django can generate working URLs for the web
-    interface.
+    Files are stored under the path determined by each model field's
+    ``upload_to`` argument and served via the same endpoint so that
+    Django can generate working URLs for the web interface.
+
     """
 
     def __init__(self, **kwargs):
@@ -50,9 +50,5 @@ class MinIOMediaStorage(S3Boto3Storage):
         # Overwrite files with the same name instead of appending a
         # suffix, which keeps URLs stable when an image is re-uploaded.
         kwargs.setdefault("file_overwrite", True)
-
-        # Upload files under the ``produtos/`` prefix to match the
-        # ImageField's upload_to='produtos/' declaration.
-        kwargs.setdefault("location", "produtos/")
 
         super().__init__(**kwargs)
