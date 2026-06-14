@@ -1,0 +1,59 @@
+{% extends 'loja/painel/base_painel.html' %}
+
+{% block title %}Produtos · Painel{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h1 class="font-display text-2xl font-bold text-brand-800">Produtos</h1>
+    <a href="{% url 'painel:produto_criar' %}" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-full shadow-sm transition">+ Novo produto</a>
+</div>
+
+<div class="bg-white rounded-2xl border border-brand-200 overflow-hidden">
+    {% if produtos %}
+        <table class="w-full text-sm">
+            <thead class="bg-brand-50 text-brand-700 text-left">
+                <tr>
+                    <th class="px-4 py-3 font-semibold"></th>
+                    <th class="px-4 py-3 font-semibold">Nome</th>
+                    <th class="px-4 py-3 font-semibold">Categoria</th>
+                    <th class="px-4 py-3 font-semibold">Preço</th>
+                    <th class="px-4 py-3 font-semibold">Status</th>
+                    <th class="px-4 py-3 font-semibold text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-brand-100">
+                {% for produto in produtos %}
+                <tr>
+                    <td class="px-4 py-3">
+                        {% if produto.imagem_principal %}
+                            <img src="{{ produto.imagem_principal.url }}" alt="" class="w-12 h-12 rounded-lg object-cover border border-brand-100">
+                        {% else %}
+                            <span class="w-12 h-12 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-300 text-xs">sem foto</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">{{ produto.nome }}</td>
+                    <td class="px-4 py-3">{{ produto.categoria.nome }}</td>
+                    <td class="px-4 py-3">R$ {{ produto.preco|floatformat:2 }}</td>
+                    <td class="px-4 py-3 space-x-1">
+                        {% if produto.ativo %}
+                            <span class="inline-block px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs">Ativo</span>
+                        {% else %}
+                            <span class="inline-block px-2 py-0.5 rounded-full bg-brand-100 text-brand-600 text-xs">Inativo</span>
+                        {% endif %}
+                        {% if produto.destaque %}
+                            <span class="inline-block px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs">Destaque</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-right space-x-2 whitespace-nowrap">
+                        <a href="{% url 'painel:produto_editar' produto.pk %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-3 py-1.5 transition inline-block">Editar</a>
+                        <a href="{% url 'painel:produto_excluir' produto.pk %}" class="bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1.5 transition inline-block">Excluir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="px-4 py-6 text-brand-600 text-sm">Nenhum produto cadastrado ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

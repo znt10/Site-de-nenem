@@ -1,0 +1,26 @@
+{% extends 'loja/painel/base_painel.html' %}
+
+{% block title %}Excluir categoria · Painel{% endblock %}
+
+{% block content %}
+<h1 class="font-display text-2xl font-bold text-brand-800 mb-6">Excluir categoria</h1>
+
+<div class="bg-white rounded-2xl border border-brand-200 p-6 max-w-md">
+    <p class="text-brand-800 mb-2">Tem certeza que deseja excluir a categoria <strong>{{ categoria.nome }}</strong>?</p>
+
+    {% if categoria.produtos.exists %}
+        <p class="text-sm text-red-600 mb-4">
+            Esta categoria possui {{ categoria.produtos.count }} produto(s) vinculado(s) e não poderá ser excluída
+            enquanto eles existirem. Mova ou exclua esses produtos primeiro.
+        </p>
+    {% else %}
+        <p class="text-sm text-brand-600 mb-4">Esta ação não pode ser desfeita.</p>
+    {% endif %}
+
+    <form method="post" class="flex gap-3">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-full shadow-sm transition">Excluir</button>
+        <a href="{% url 'painel:categoria_lista' %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-4 py-2 transition">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

@@ -23,14 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
+SECRET_KEY = os.getenv(
     'SECRET_KEY', 'django-insecure-m0*p&ro8#l3v^f6d-elyb=g2#qwq6j^o81v735)!xt(ygdz6r1'
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
 CSRF_TRUSTED_ORIGINS = [
     f'https://{h}' for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')
@@ -38,7 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Diretório para dados persistentes (banco de dados e mídia).
 # Em produção (Railway), aponte DATA_DIR para o caminho do volume montado.
-DATA_DIR = Path(os.environ.get('DATA_DIR', BASE_DIR))
+DATA_DIR = Path(os.getenv('DATA_DIR', BASE_DIR))
 
 
 # Application definition
@@ -91,15 +91,15 @@ WSGI_APPLICATION = 'panoslar.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.environ.get('MYSQLHOST') or os.environ.get('DB_HOST'):
+if os.getenv('DB_ENGINE'):
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'railway')),
-            'USER': os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root')),
-            'PASSWORD': os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', '')),
-            'HOST': os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', '127.0.0.1')),
-            'PORT': os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', '3306')),
+            'ENGINE': os.getenv('DB_ENGINE'),
+            'NAME': os.getenv('DB_NAME', os.getenv('MYSQLDATABASE', 'railway')),
+            'USER': os.getenv('DB_USER', os.getenv('MYSQLUSER', 'root')),
+            'PASSWORD': os.getenv('DB_PASSWORD', os.getenv('MYSQLPASSWORD', '')),
+            'HOST': os.getenv('DB_HOST', os.getenv('MYSQLHOST', '127.0.0.1')),
+            'PORT': os.getenv('DB_PORT', os.getenv('MYSQLPORT', '3306')),
             'OPTIONS': {'charset': 'utf8mb4'},
         }
     }
@@ -160,7 +160,7 @@ STORAGES = {
 
 # Usa o MinIO apenas quando configurado (ex: produção no Railway).
 # Sem MINIO_ENDPOINT, os uploads continuam indo para MEDIA_ROOT (disco local).
-if os.environ.get('MINIO_ENDPOINT'):
+if os.getenv('MINIO_ENDPOINT'):
     STORAGES['default'] = {
         'BACKEND': 'panoslar.storage.MinIOMediaStorage',
     }
@@ -174,9 +174,9 @@ if os.environ.get('MINIO_ENDPOINT'):
 # internal endpoint (MINIO_ENDPOINT), which browsers cannot reach.  Instead,
 # MinIOMediaStorage sets endpoint_url to the private endpoint only for the
 # upload connection, and uses custom_domain for public URL generation.
-AWS_ACCESS_KEY_ID = os.environ.get('MINIO_ACCESS_KEY', '')
-AWS_SECRET_ACCESS_KEY = os.environ.get('MINIO_SECRET_KEY', '')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('MINIO_BUCKET_NAME', 'media')
+AWS_ACCESS_KEY_ID = os.getenv('MINIO_ACCESS_KEY', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('MINIO_SECRET_KEY', '')
+AWS_STORAGE_BUCKET_NAME = os.getenv('MINIO_BUCKET_NAME', 'media')
 AWS_S3_REGION_NAME = 'us-east-1'          # MinIO default region
 AWS_S3_SIGNATURE_VERSION = 's3v4'         # required by MinIO
 AWS_S3_USE_SSL = False                     # plain HTTP on the private network
@@ -189,13 +189,19 @@ AWS_S3_FILE_OVERWRITE = True              # overwrite on re-upload keeps URLs st
 # by img.url are reachable by browsers.  The storage backend continues to use
 # MINIO_ENDPOINT (private) for uploads — fast internal communication.
 # MEDIA_ROOT is kept for local fallback / management commands.
-_minio_public_endpoint = os.environ.get('MINIO_PUBLIC_ENDPOINT', '').rstrip('/')
-_minio_bucket = os.environ.get('MINIO_BUCKET_NAME', 'media')
+_minio_public_endpoint = os.getenv('MINIO_PUBLIC_ENDPOINT', '').rstrip('/')
+_minio_bucket = os.getenv('MINIO_BUCKET_NAME', 'media')
 MEDIA_URL = f'{_minio_public_endpoint}/{_minio_bucket}/' if _minio_public_endpoint else 'media/'
 MEDIA_ROOT = DATA_DIR / 'media'
 
 # Configurações da loja
-WHATSAPP_NUMERO = os.environ.get('WHATSAPP_NUMERO', '5583982217869')  # DDI+DDD+numero
-NOME_LOJA = os.environ.get('NOME_LOJA', 'Panos & Cia')
+WHATSAPP_NUMERO = os.getenv('WHATSAPP_NUMERO')  # DDI+DDD+numero
+NOME_LOJA = os.getenv('NOME_LOJA')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Painel administrativo (autenticação)
+LOGIN_URL = 'painel:login'
+LOGIN_REDIRECT_URL = 'painel:dashboard'
+LOGOUT_REDIRECT_URL = 'painel:login'
+NOME_LOJA

@@ -21,6 +21,7 @@ from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('painel/', include('loja.painel_urls')),
     path('', include('loja.urls')),
 ]
 

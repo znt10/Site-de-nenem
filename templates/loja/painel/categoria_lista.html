@@ -1,0 +1,38 @@
+{% extends 'loja/painel/base_painel.html' %}
+
+{% block title %}Categorias · Painel{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h1 class="font-display text-2xl font-bold text-brand-800">Categorias</h1>
+    <a href="{% url 'painel:categoria_criar' %}" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-full shadow-sm transition">+ Nova categoria</a>
+</div>
+
+<div class="bg-white rounded-2xl border border-brand-200 overflow-hidden">
+    {% if categorias %}
+        <table class="w-full text-sm">
+            <thead class="bg-brand-50 text-brand-700 text-left">
+                <tr>
+                    <th class="px-4 py-3 font-semibold">Nome</th>
+                    <th class="px-4 py-3 font-semibold">Produtos</th>
+                    <th class="px-4 py-3 font-semibold text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-brand-100">
+                {% for categoria in categorias %}
+                <tr>
+                    <td class="px-4 py-3">{{ categoria.nome }}</td>
+                    <td class="px-4 py-3">{{ categoria.produtos.count }}</td>
+                    <td class="px-4 py-3 text-right space-x-2">
+                        <a href="{% url 'painel:categoria_editar' categoria.pk %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-3 py-1.5 transition inline-block">Editar</a>
+                        <a href="{% url 'painel:categoria_excluir' categoria.pk %}" class="bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1.5 transition inline-block">Excluir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="px-4 py-6 text-brand-600 text-sm">Nenhuma categoria cadastrada ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -25,6 +25,9 @@
             <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
                 <a href="{% url 'loja:home' %}" class="hover:text-brand-600 transition">Início</a>
                 <a href="{% url 'loja:produto_lista' %}" class="hover:text-brand-600 transition">Produtos</a>
+                {% if request.user.is_staff %}
+                    <a href="{% url 'painel:dashboard' %}" class="hover:text-brand-600 transition">Painel</a>
+                {% endif %}
                 <a href="{% whatsapp_link_geral request %}" target="_blank" rel="noopener" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-full shadow-sm transition">Fale Comigo</a>
             </nav>
 
@@ -47,6 +50,9 @@
             <div class="flex flex-col gap-1 text-sm font-medium">
                 <a href="{% url 'loja:home' %}" class="px-3 py-2 rounded-lg text-center hover:bg-brand-100 transition">Início</a>
                 <a href="{% url 'loja:produto_lista' %}" class="px-3 py-2 rounded-lg text-center hover:bg-brand-100 transition">Produtos</a>
+                {% if request.user.is_staff %}
+                    <a href="{% url 'painel:dashboard' %}" class="px-3 py-2 rounded-lg text-center hover:bg-brand-100 transition">Painel</a>
+                {% endif %}
                 <a href="{% whatsapp_link_geral request %}" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg bg-brand-500 text-white text-center">Fale Comigo</a>
             </div>
         </div>
