@@ -28,7 +28,7 @@
         <span class="block sm:inline sm:before:content-['_·_']">Feito por José Neto</span>
         <span class="block sm:inline sm:before:content-['_·_']">
             {% if request.user.is_staff %}
-                <a href="{% url 'painel:dashboard' %}" class="hover:text-white transition">Painel</a>
+                <a href="{% url 'painel:categoria_lista' %}" class="hover:text-white transition">Painel</a>
             {% else %}
                 <a href="{% url 'painel:login' %}" class="hover:text-white transition">Login</a>
             {% endif %}

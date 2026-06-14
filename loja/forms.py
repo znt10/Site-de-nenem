@@ -50,11 +50,10 @@ class ProdutoForm(forms.ModelForm):
 ImagemProdutoFormSet = inlineformset_factory(
     Produto,
     ImagemProduto,
-    fields=['imagem', 'ordem'],
+    fields=['imagem'],
     extra=3,
     can_delete=True,
     widgets={
         'imagem': forms.ClearableFileInput(attrs={'class': 'block w-full text-sm text-brand-700'}),
-        'ordem': forms.NumberInput(attrs={'class': INPUT_CLASSES + ' w-20', 'min': '0'}),
     },
 )

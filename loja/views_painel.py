@@ -21,21 +21,17 @@ class PainelLoginView(LoginView):
         return super().form_valid(form)
 
 
-@staff_required
-def dashboard(request):
-    return render(request, 'loja/painel/dashboard.html', {
-        'total_produtos': Produto.objects.count(),
-        'total_categorias': Categoria.objects.count(),
-        'produtos_inativos': Produto.objects.filter(ativo=False).count(),
-    })
-
-
 # --- Categoria ---
 
 @staff_required
 def categoria_lista(request):
     categorias = Categoria.objects.all()
-    return render(request, 'loja/painel/categoria_lista.html', {'categorias': categorias})
+    return render(request, 'loja/painel/categoria_lista.html', {
+        'categorias': categorias,
+        'total_produtos': Produto.objects.count(),
+        'total_categorias': Categoria.objects.count(),
+        'produtos_inativos': Produto.objects.filter(ativo=False).count(),
+    })
 
 
 @staff_required
@@ -70,7 +66,12 @@ def categoria_excluir(request, pk):
 @staff_required
 def produto_lista(request):
     produtos = Produto.objects.select_related('categoria').prefetch_related('imagens')
-    return render(request, 'loja/painel/produto_lista.html', {'produtos': produtos})
+    return render(request, 'loja/painel/produto_lista.html', {
+        'produtos': produtos,
+        'total_produtos': Produto.objects.count(),
+        'total_categorias': Categoria.objects.count(),
+        'produtos_inativos': Produto.objects.filter(ativo=False).count(),
+    })
 
 
 @staff_required

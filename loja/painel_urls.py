@@ -8,7 +8,6 @@ app_name = 'painel'
 urlpatterns = [
     path('login/', views_painel.PainelLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('', views_painel.dashboard, name='dashboard'),
 
     path('categorias/', views_painel.categoria_lista, name='categoria_lista'),
     path('categorias/nova/', views_painel.categoria_form, name='categoria_criar'),

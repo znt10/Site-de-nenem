@@ -8,6 +8,21 @@
     <a href="{% url 'painel:produto_criar' %}" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-full shadow-sm transition">+ Novo produto</a>
 </div>
 
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-brand-200 p-5">
+        <p class="text-sm text-brand-600">Produtos</p>
+        <p class="font-display text-3xl font-bold text-brand-800">{{ total_produtos }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-brand-200 p-5">
+        <p class="text-sm text-brand-600">Categorias</p>
+        <p class="font-display text-3xl font-bold text-brand-800">{{ total_categorias }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-brand-200 p-5">
+        <p class="text-sm text-brand-600">Produtos inativos</p>
+        <p class="font-display text-3xl font-bold text-brand-800">{{ produtos_inativos }}</p>
+    </div>
+</div>
+
 <div class="bg-white rounded-2xl border border-brand-200 overflow-hidden">
     {% if produtos %}
         <table class="w-full text-sm">

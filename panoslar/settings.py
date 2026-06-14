@@ -202,6 +202,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Painel administrativo (autenticação)
 LOGIN_URL = 'painel:login'
-LOGIN_REDIRECT_URL = 'painel:dashboard'
+LOGIN_REDIRECT_URL = 'painel:categoria_lista'
 LOGOUT_REDIRECT_URL = 'painel:login'
 NOME_LOJA

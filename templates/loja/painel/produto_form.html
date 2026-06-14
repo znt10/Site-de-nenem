@@ -70,16 +70,13 @@
                             {{ imagem_form.imagem }}
                             {% for error in imagem_form.imagem.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
                         </div>
-                        <div class="flex items-center gap-4">
-                            <label class="flex items-center gap-2 text-sm text-brand-700">
-                                Ordem: {{ imagem_form.ordem }}
-                            </label>
-                            {% if imagem_form.instance.pk %}
+                        {% if imagem_form.instance.pk %}
+                            <div class="flex items-center gap-4">
                                 <label class="flex items-center gap-2 text-sm text-red-600">
                                     {{ imagem_form.DELETE }} Remover esta imagem
                                 </label>
-                            {% endif %}
-                        </div>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
