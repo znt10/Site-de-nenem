@@ -1,0 +1,24 @@
+{% extends 'loja/painel/base_painel.html' %}
+
+{% block title %}Excluir produto · Painel{% endblock %}
+
+{% block content %}
+<h1 class="font-display text-2xl font-bold text-brand-800 mb-6">Excluir produto</h1>
+
+<div class="bg-white rounded-2xl border border-brand-200 p-6 max-w-md">
+    <div class="flex items-center gap-4 mb-4">
+        {% if produto.imagem_principal %}
+            <img src="{{ produto.imagem_principal.url }}" alt="" class="w-16 h-16 rounded-lg object-cover border border-brand-100">
+        {% endif %}
+        <p class="text-brand-800">Tem certeza que deseja excluir o produto <strong>{{ produto.nome }}</strong>?</p>
+    </div>
+
+    <p class="text-sm text-red-600 mb-4">Esta ação não pode ser desfeita e todas as imagens do produto serão removidas.</p>
+
+    <form method="post" class="flex gap-3">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-full shadow-sm transition">Excluir</button>
+        <a href="{% url 'painel:produto_lista' %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-4 py-2 transition">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

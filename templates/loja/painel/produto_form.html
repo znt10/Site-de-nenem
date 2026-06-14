@@ -1,0 +1,91 @@
+{% extends 'loja/painel/base_painel.html' %}
+
+{% block title %}{% if produto %}Editar produto{% else %}Novo produto{% endif %} · Painel{% endblock %}
+
+{% block content %}
+<h1 class="font-display text-2xl font-bold text-brand-800 mb-6">
+    {% if produto %}Editar produto{% else %}Novo produto{% endif %}
+</h1>
+
+<form method="post" enctype="multipart/form-data" class="space-y-6 max-w-2xl">
+    {% csrf_token %}
+
+    <div class="bg-white rounded-2xl border border-brand-200 p-6 space-y-4">
+        <div>
+            <label for="{{ form.nome.id_for_label }}" class="block text-sm font-medium text-brand-700 mb-1">Nome</label>
+            {{ form.nome }}
+            {% for error in form.nome.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div>
+            <label for="{{ form.categoria.id_for_label }}" class="block text-sm font-medium text-brand-700 mb-1">Categoria</label>
+            {{ form.categoria }}
+            {% for error in form.categoria.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div>
+            <label for="{{ form.descricao.id_for_label }}" class="block text-sm font-medium text-brand-700 mb-1">Descrição</label>
+            {{ form.descricao }}
+            {% for error in form.descricao.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div>
+            <label for="{{ form.preco.id_for_label }}" class="block text-sm font-medium text-brand-700 mb-1">Preço (R$)</label>
+            {{ form.preco }}
+            {% for error in form.preco.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="flex gap-6">
+            <label class="flex items-center gap-2 text-sm font-medium text-brand-700">
+                {{ form.destaque }} Produto em destaque
+            </label>
+            <label class="flex items-center gap-2 text-sm font-medium text-brand-700">
+                {{ form.ativo }} Ativo
+            </label>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-brand-200 p-6">
+        <h2 class="font-display text-lg font-bold text-brand-800 mb-4">Imagens</h2>
+
+        {{ formset.management_form }}
+        {% if formset.non_form_errors %}
+            <div class="mb-4 rounded-2xl px-4 py-3 text-sm font-medium bg-red-100 text-red-800 border border-red-200">
+                {% for error in formset.non_form_errors %}{{ error }}{% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="space-y-4">
+            {% for imagem_form in formset.forms %}
+                <div class="flex items-center gap-4 border border-brand-100 rounded-2xl p-4">
+                    {% if imagem_form.instance.pk and imagem_form.instance.imagem %}
+                        <img src="{{ imagem_form.instance.imagem.url }}" alt="" class="w-16 h-16 rounded-lg object-cover border border-brand-100">
+                    {% else %}
+                        <span class="w-16 h-16 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-300 text-xs text-center">sem foto</span>
+                    {% endif %}
+
+                    <div class="flex-1 space-y-2">
+                        {% for hidden in imagem_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        <div>
+                            {{ imagem_form.imagem }}
+                            {% for error in imagem_form.imagem.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        {% if imagem_form.instance.pk %}
+                            <div class="flex items-center gap-4">
+                                <label class="flex items-center gap-2 text-sm text-red-600">
+                                    {{ imagem_form.DELETE }} Remover esta imagem
+                                </label>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="flex gap-3">
+        <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-full shadow-sm transition">Salvar</button>
+        <a href="{% url 'painel:produto_lista' %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-4 py-2 transition">Cancelar</a>
+    </div>
+</form>
+{% endblock %}
