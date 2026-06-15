@@ -20,10 +20,14 @@ from django.urls import include, path, re_path
 from django.views.static import serve
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('painel/', include('loja.painel_urls')),
     path('', include('loja.urls')),
 ]
+
+# Admin do Django só fica disponível em desenvolvimento (DEBUG=True).
+# Em produção o gerenciamento é feito pelo painel próprio (/painel/).
+if settings.DEBUG:
+    urlpatterns = [path('admin/', admin.site.urls)] + urlpatterns
 
 # Serve os arquivos de media (fotos dos produtos) localmente, tanto em
 # desenvolvimento quanto em produção sem MinIO. static() do Django só
