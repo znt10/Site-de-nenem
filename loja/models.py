@@ -31,6 +31,7 @@ class Produto(models.Model):
     )
     destaque = models.BooleanField('Produto em destaque', default=False)
     ativo = models.BooleanField('Ativo', default=True)
+    vendido = models.BooleanField('Vendido', default=False)
     created_at = models.DateTimeField('Criado em', auto_now_add=True)
 
     class Meta:

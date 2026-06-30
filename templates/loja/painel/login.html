@@ -45,7 +45,7 @@
 
 <div class="w-full max-w-sm">
     <div class="text-center mb-6">
-        <span class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-500 text-white text-2xl shadow-sm">🧺</span>
+        <img src="{% static 'img/logo.png' %}" alt="{{ NOME_LOJA }}" class="w-16 h-16 object-contain mx-auto">
         <h1 class="font-display font-extrabold text-2xl text-brand-700 mt-3">{{ NOME_LOJA }}</h1>
         <p class="text-sm text-brand-600">Painel administrativo</p>
     </div>
@@ -59,13 +59,6 @@
 
         <form method="post" class="space-y-4">
             {% csrf_token %}
-            <div>
-                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-brand-700 mb-1">Usuário</label>
-                {{ form.username }}
-                {% for error in form.username.errors %}
-                    <p class="text-xs text-red-600 mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
             <div>
                 <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-brand-700 mb-1">Senha</label>
                 {{ form.password }}

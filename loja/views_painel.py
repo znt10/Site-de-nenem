@@ -1,24 +1,38 @@
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.views import LoginView
+from django.contrib.auth import login
 from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views import View
+from django.views.decorators.http import require_POST
 
 from .decorators import staff_required
 from .forms import CategoriaForm, ImagemProdutoFormSet, PainelLoginForm, ProdutoForm
 from .models import Categoria, Produto
 
 
-class PainelLoginView(LoginView):
+class PainelLoginView(View):
     template_name = 'loja/painel/login.html'
-    authentication_form = PainelLoginForm
-    redirect_authenticated_user = True
 
-    def form_valid(self, form):
-        user = form.get_user()
-        if not user.is_staff:
-            form.add_error(None, 'Esta conta não tem acesso ao painel.')
-            return self.form_invalid(form)
-        return super().form_valid(form)
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_staff:
+            return redirect(settings.LOGIN_REDIRECT_URL)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        form = PainelLoginForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = PainelLoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            if not user.is_staff:
+                form.add_error(None, 'Esta conta não tem acesso ao painel.')
+                return render(request, self.template_name, {'form': form})
+            login(request, user)
+            return redirect(settings.LOGIN_REDIRECT_URL)
+        return render(request, self.template_name, {'form': form})
 
 
 # --- Categoria ---
@@ -63,14 +77,37 @@ def categoria_excluir(request, pk):
 
 # --- Produto ---
 
+ORDENACOES_PRODUTO = {
+    'nome': 'nome',
+    '-nome': '-nome',
+    'preco': 'preco',
+    '-preco': '-preco',
+    '-created_at': '-created_at',
+    'created_at': 'created_at',
+}
+
+
 @staff_required
-def produto_lista(request):
-    produtos = Produto.objects.select_related('categoria').prefetch_related('imagens')
+def produto_lista(request, vendidos=False):
+    busca = request.GET.get('q', '').strip()
+    ordenar = request.GET.get('ordenar', '-created_at')
+    if ordenar not in ORDENACOES_PRODUTO:
+        ordenar = '-created_at'
+
+    produtos = Produto.objects.select_related('categoria').prefetch_related('imagens').filter(vendido=vendidos)
+    if busca:
+        produtos = produtos.filter(nome__icontains=busca)
+    produtos = produtos.order_by(ORDENACOES_PRODUTO[ordenar])
+
     return render(request, 'loja/painel/produto_lista.html', {
         'produtos': produtos,
         'total_produtos': Produto.objects.count(),
         'total_categorias': Categoria.objects.count(),
-        'produtos_inativos': Produto.objects.filter(ativo=False).count(),
+        'total_disponiveis': Produto.objects.filter(vendido=False).count(),
+        'produtos_vendidos': Produto.objects.filter(vendido=True).count(),
+        'busca': busca,
+        'ordenar': ordenar,
+        'mostrando_vendidos': vendidos,
     })
 
 
@@ -92,6 +129,23 @@ def produto_form(request, pk=None):
     return render(request, 'loja/painel/produto_form.html', {
         'form': form, 'formset': formset, 'produto': produto,
     })
+
+
+@staff_required
+@require_POST
+def produto_toggle_vendido(request, pk):
+    produto = get_object_or_404(Produto, pk=pk)
+    produto.vendido = not produto.vendido
+    produto.save(update_fields=['vendido'])
+    if produto.vendido:
+        messages.success(request, f'"{produto.nome}" marcado como vendido.')
+    else:
+        messages.success(request, f'"{produto.nome}" marcado como disponível.')
+
+    next_url = request.POST.get('next')
+    if next_url and next_url.startswith('/'):
+        return redirect(next_url)
+    return redirect('painel:produto_lista')
 
 
 @staff_required

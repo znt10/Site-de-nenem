@@ -1,5 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.forms import inlineformset_factory
 
 from .models import Categoria, ImagemProduto, Produto
@@ -19,9 +20,30 @@ TEXTAREA_CLASSES = (
 CHECKBOX_CLASSES = 'h-5 w-5 rounded text-brand-500 focus:ring-brand-400'
 
 
-class PainelLoginForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': INPUT_CLASSES, 'autofocus': True}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': INPUT_CLASSES}))
+class PainelLoginForm(forms.Form):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': INPUT_CLASSES, 'autofocus': True}),
+    )
+
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        self.user_cache = None
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            staff = User.objects.filter(is_staff=True).first()
+            if staff:
+                self.user_cache = authenticate(
+                    self.request, username=staff.username, password=password,
+                )
+            if self.user_cache is None:
+                raise forms.ValidationError('Senha incorreta.')
+        return self.cleaned_data
+
+    def get_user(self):
+        return self.user_cache
 
 
 class CategoriaForm(forms.ModelForm):
@@ -36,7 +58,7 @@ class CategoriaForm(forms.ModelForm):
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
-        fields = ['nome', 'categoria', 'descricao', 'preco', 'destaque', 'ativo']
+        fields = ['nome', 'categoria', 'descricao', 'preco', 'destaque', 'ativo', 'vendido']
         widgets = {
             'nome': forms.TextInput(attrs={'class': INPUT_CLASSES}),
             'categoria': forms.Select(attrs={'class': SELECT_CLASSES}),
@@ -44,6 +66,7 @@ class ProdutoForm(forms.ModelForm):
             'preco': forms.NumberInput(attrs={'class': INPUT_CLASSES, 'step': '0.01', 'min': '0'}),
             'destaque': forms.CheckboxInput(attrs={'class': CHECKBOX_CLASSES}),
             'ativo': forms.CheckboxInput(attrs={'class': CHECKBOX_CLASSES}),
+            'vendido': forms.CheckboxInput(attrs={'class': CHECKBOX_CLASSES}),
         }
 
 
@@ -54,6 +77,6 @@ ImagemProdutoFormSet = inlineformset_factory(
     extra=3,
     can_delete=True,
     widgets={
-        'imagem': forms.ClearableFileInput(attrs={'class': 'block w-full text-sm text-brand-700'}),
+        'imagem': forms.ClearableFileInput(attrs={'class': 'imagem-input block w-full text-sm text-brand-700'}),
     },
 )

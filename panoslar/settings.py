@@ -91,25 +91,17 @@ WSGI_APPLICATION = 'panoslar.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.getenv('DB_ENGINE'):
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('DB_ENGINE'),
-            'NAME': os.getenv('DB_NAME', os.getenv('MYSQLDATABASE', 'railway')),
-            'USER': os.getenv('DB_USER', os.getenv('MYSQLUSER', 'root')),
-            'PASSWORD': os.getenv('DB_PASSWORD', os.getenv('MYSQLPASSWORD', '')),
-            'HOST': os.getenv('DB_HOST', os.getenv('MYSQLHOST', '127.0.0.1')),
-            'PORT': os.getenv('DB_PORT', os.getenv('MYSQLPORT', '3306')),
-            'OPTIONS': {'charset': 'utf8mb4'},
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
+        'NAME': os.getenv('DB_NAME', os.getenv('MYSQLDATABASE', 'panoslar')),
+        'USER': os.getenv('DB_USER', os.getenv('MYSQLUSER', 'root')),
+        'PASSWORD': os.getenv('DB_PASSWORD', os.getenv('MYSQLPASSWORD', '')),
+        'HOST': os.getenv('DB_HOST', os.getenv('MYSQLHOST', 'db')),
+        'PORT': os.getenv('DB_PORT', os.getenv('MYSQLPORT', '3306')),
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': DATA_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 
 # Password validation
@@ -197,6 +189,7 @@ MEDIA_ROOT = DATA_DIR / 'media'
 # Configurações da loja
 WHATSAPP_NUMERO = os.getenv('WHATSAPP_NUMERO')  # DDI+DDD+numero
 NOME_LOJA = os.getenv('NOME_LOJA')
+INSTAGRAM_URL = os.getenv('INSTAGRAM_URL', '')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -204,4 +197,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'painel:login'
 LOGIN_REDIRECT_URL = 'painel:categoria_lista'
 LOGOUT_REDIRECT_URL = 'painel:login'
-NOME_LOJA

@@ -3,9 +3,11 @@
 {% block title %}Categorias · Painel{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-between mb-6">
+<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
     <h1 class="font-display text-2xl font-bold text-brand-800">Categorias</h1>
-    <a href="{% url 'painel:categoria_criar' %}" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-full shadow-sm transition">+ Nova categoria</a>
+    <a href="{% url 'painel:categoria_criar' %}" class="inline-flex items-center justify-center gap-1.5 self-start sm:self-auto whitespace-nowrap bg-brand-500 hover:bg-brand-600 text-white font-semibold px-5 py-2.5 rounded-full shadow-sm transition">
+        <span aria-hidden="true">+</span> Nova categoria
+    </a>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -25,7 +27,24 @@
 
 <div class="bg-white rounded-2xl border border-brand-200 overflow-hidden">
     {% if categorias %}
-        <table class="w-full text-sm">
+        <!-- Mobile / tablet: lista em cartões -->
+        <ul class="sm:hidden divide-y divide-brand-100">
+            {% for categoria in categorias %}
+            <li class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="font-medium text-brand-900 truncate">{{ categoria.nome }}</p>
+                    <p class="text-xs text-brand-500 mt-0.5">{{ categoria.produtos.count }} produto{{ categoria.produtos.count|pluralize }}</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{% url 'painel:categoria_editar' categoria.pk %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition">Editar</a>
+                    <a href="{% url 'painel:categoria_excluir' categoria.pk %}" class="bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition">Excluir</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Desktop: tabela -->
+        <table class="hidden sm:table w-full text-sm">
             <thead class="bg-brand-50 text-brand-700 text-left">
                 <tr>
                     <th class="px-4 py-3 font-semibold">Nome</th>
@@ -35,12 +54,14 @@
             </thead>
             <tbody class="divide-y divide-brand-100">
                 {% for categoria in categorias %}
-                <tr>
+                <tr class="hover:bg-brand-50/60 transition-colors">
                     <td class="px-4 py-3">{{ categoria.nome }}</td>
                     <td class="px-4 py-3">{{ categoria.produtos.count }}</td>
-                    <td class="px-4 py-3 text-right space-x-2">
-                        <a href="{% url 'painel:categoria_editar' categoria.pk %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-3 py-1.5 transition inline-block">Editar</a>
-                        <a href="{% url 'painel:categoria_excluir' categoria.pk %}" class="bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1.5 transition inline-block">Excluir</a>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="{% url 'painel:categoria_editar' categoria.pk %}" class="border border-brand-200 text-brand-700 hover:bg-brand-100 rounded-full px-3 py-1.5 whitespace-nowrap transition">Editar</a>
+                            <a href="{% url 'painel:categoria_excluir' categoria.pk %}" class="bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1.5 whitespace-nowrap transition">Excluir</a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
