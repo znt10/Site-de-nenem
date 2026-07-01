@@ -7,7 +7,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from .decorators import staff_required
-from .forms import CategoriaForm, ImagemProdutoFormSet, PainelLoginForm, ProdutoForm
+from .forms import CaracteristicaFormSet, CategoriaForm, ImagemProdutoFormSet, PainelLoginForm, ProdutoForm
 from .models import Categoria, Produto
 
 
@@ -117,17 +117,33 @@ def produto_form(request, pk=None):
     if request.method == 'POST':
         form = ProdutoForm(request.POST, instance=produto)
         formset = ImagemProdutoFormSet(request.POST, request.FILES, instance=produto or Produto())
-        if form.is_valid() and formset.is_valid():
-            produto = form.save()
+        carac_formset = CaracteristicaFormSet(request.POST, instance=produto or Produto(), prefix='carac')
+        if form.is_valid() and formset.is_valid() and carac_formset.is_valid():
+            novo = pk is None
+            produto = form.save(commit=False)
+            if novo:
+                produto.ativo = True
+                produto.vendido = False
+            produto.save()
             formset.instance = produto
             formset.save()
+            carac_formset.instance = produto
+            # Salva só características com valor preenchido
+            instances = carac_formset.save(commit=False)
+            for obj in instances:
+                if obj.valor.strip():
+                    obj.produto = produto
+                    obj.save()
+            for obj in carac_formset.deleted_objects:
+                obj.delete()
             messages.success(request, 'Produto salvo com sucesso.')
             return redirect('painel:produto_lista')
     else:
         form = ProdutoForm(instance=produto)
         formset = ImagemProdutoFormSet(instance=produto)
+        carac_formset = CaracteristicaFormSet(instance=produto, prefix='carac')
     return render(request, 'loja/painel/produto_form.html', {
-        'form': form, 'formset': formset, 'produto': produto,
+        'form': form, 'formset': formset, 'carac_formset': carac_formset, 'produto': produto,
     })
 
 

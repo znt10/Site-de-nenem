@@ -39,13 +39,17 @@ def produto_lista(request):
 
 def produto_detalhe(request, slug):
     produto = get_object_or_404(
-        Produto.objects.select_related('categoria').prefetch_related('imagens'),
+        Produto.objects.select_related('categoria').prefetch_related('imagens', 'caracteristicas'),
         slug=slug, ativo=True, vendido=False,
     )
     relacionados = Produto.objects.filter(
         ativo=True, vendido=False, categoria=produto.categoria
     ).exclude(pk=produto.pk).prefetch_related('imagens')[:4]
+    carac_principais = produto.caracteristicas.filter(secao='principal')
+    carac_venda = produto.caracteristicas.filter(secao='venda')
     return render(request, 'loja/produto_detalhe.html', {
         'produto': produto,
         'relacionados': relacionados,
+        'carac_principais': carac_principais,
+        'carac_venda': carac_venda,
     })

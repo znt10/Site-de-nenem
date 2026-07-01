@@ -62,6 +62,28 @@ class Produto(models.Model):
         return primeira.imagem if primeira else None
 
 
+class CaracteristicaProduto(models.Model):
+    SECAO_CHOICES = [
+        ('principal', 'Características principais'),
+        ('venda', 'Características de venda'),
+    ]
+    produto = models.ForeignKey(
+        Produto, related_name='caracteristicas', on_delete=models.CASCADE, verbose_name='Produto'
+    )
+    chave = models.CharField('Nome', max_length=100)
+    valor = models.CharField('Valor', max_length=200, blank=True)
+    secao = models.CharField('Seção', max_length=20, choices=SECAO_CHOICES, default='principal')
+    ordem = models.PositiveIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'Característica do Produto'
+        verbose_name_plural = 'Características do Produto'
+        ordering = ['secao', 'ordem', 'id']
+
+    def __str__(self):
+        return f'{self.chave}: {self.valor}'
+
+
 class ImagemProduto(models.Model):
     produto = models.ForeignKey(Produto, related_name='imagens', on_delete=models.CASCADE, verbose_name='Produto')
     imagem = models.ImageField('Imagem', upload_to='produtos/')

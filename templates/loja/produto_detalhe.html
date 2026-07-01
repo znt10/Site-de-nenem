@@ -75,6 +75,50 @@
         </div>
     </div>
 
+    <!-- Características -->
+    {% if carac_principais or carac_venda %}
+    <div class="mt-12">
+        <h2 class="font-display font-bold text-2xl sm:text-3xl mb-6">Características</h2>
+        <div class="grid sm:grid-cols-2 gap-6">
+
+            {% if carac_principais %}
+            <div>
+                <h3 class="font-display font-semibold text-base text-brand-700 mb-3 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 rounded-full bg-brand-500"></span>
+                    Características principais
+                </h3>
+                <table class="w-full text-sm border-collapse rounded-xl overflow-hidden border border-brand-100">
+                    {% for c in carac_principais %}{% if c.valor %}
+                    <tr class="{% if forloop.counter|divisibleby:2 %}bg-white{% else %}bg-brand-50{% endif %}">
+                        <td class="py-2.5 px-4 font-semibold text-brand-700 w-1/2 border-b border-brand-100">{{ c.chave }}</td>
+                        <td class="py-2.5 px-4 text-brand-600 border-b border-brand-100">{{ c.valor }}</td>
+                    </tr>
+                    {% endif %}{% endfor %}
+                </table>
+            </div>
+            {% endif %}
+
+            {% if carac_venda %}
+            <div>
+                <h3 class="font-display font-semibold text-base text-brand-700 mb-3 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 rounded-full bg-green-500"></span>
+                    Características de venda
+                </h3>
+                <table class="w-full text-sm border-collapse rounded-xl overflow-hidden border border-brand-100">
+                    {% for c in carac_venda %}{% if c.valor %}
+                    <tr class="{% if forloop.counter|divisibleby:2 %}bg-white{% else %}bg-brand-50{% endif %}">
+                        <td class="py-2.5 px-4 font-semibold text-brand-700 w-1/2 border-b border-brand-100">{{ c.chave }}</td>
+                        <td class="py-2.5 px-4 text-brand-600 border-b border-brand-100">{{ c.valor }}</td>
+                    </tr>
+                    {% endif %}{% endfor %}
+                </table>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Relacionados -->
     {% if relacionados %}
     <div class="mt-16">

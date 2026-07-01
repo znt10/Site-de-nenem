@@ -7,6 +7,12 @@
     {% if produto %}Editar produto{% else %}Novo produto{% endif %}
 </h1>
 
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 p-4" onclick="fecharLightbox(event)">
+    <button type="button" onclick="fecharLightbox()" class="absolute top-4 right-5 text-white text-4xl leading-none font-light">&times;</button>
+    <img id="lightbox-img" src="" alt="" class="max-w-full max-h-full rounded-xl object-contain shadow-2xl">
+</div>
+
 <form method="post" enctype="multipart/form-data" class="space-y-6 max-w-2xl">
     {% csrf_token %}
 
@@ -35,10 +41,42 @@
             {% for error in form.preco.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
         </div>
 
-        <div class="flex flex-wrap gap-6">
-            <label class="flex items-center gap-2 text-sm font-medium text-brand-700">
-                {{ form.destaque }} Produto em destaque
-            </label>
+        <!-- Destaque: checkbox real escondido + toggle dramático ON/OFF -->
+        <div class="pt-1">
+            <div style="display:none">{{ form.destaque }}</div>
+            <button type="button" id="destaque-btn" onclick="alternarDestaque()"
+                class="w-full rounded-2xl select-none text-left overflow-hidden"
+                style="border: 3px solid #e5e7eb; background: #f3f4f6; transition: border-color .3s, background .3s, box-shadow .3s; padding: 0; cursor: pointer;">
+
+                <!-- Barra de cor no topo -->
+                <div id="d-topbar" style="height: 6px; background: #d1d5db; transition: background .3s;"></div>
+
+                <div style="display: flex; align-items: center; gap: 16px; padding: 20px;">
+
+                    <!-- Círculo com estrela -->
+                    <div id="d-circle" style="width: 72px; height: 72px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .3s, box-shadow .3s;">
+                        <span id="d-star" style="font-size: 36px; transition: filter .3s, transform .3s, opacity .3s; filter: grayscale(1); opacity: 0.35;">⭐</span>
+                    </div>
+
+                    <!-- Texto central -->
+                    <div style="flex: 1; min-width: 0;">
+                        <p id="d-titulo" style="font-family: Poppins, sans-serif; font-weight: 800; font-size: 20px; line-height: 1.2; color: #9ca3af; transition: color .3s;">SEM DESTAQUE</p>
+                        <p id="d-sub" style="font-size: 13px; margin-top: 4px; color: #d1d5db; transition: color .3s; font-weight: 500;">Produto não aparece nos destaques</p>
+                    </div>
+
+                    <!-- Chave ON/OFF grande -->
+                    <div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                        <div id="d-switch" style="width: 72px; height: 36px; border-radius: 999px; background: #d1d5db; position: relative; transition: background .3s;">
+                            <div id="d-knob" style="position: absolute; top: 4px; left: 4px; width: 28px; height: 28px; background: white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,.25); transition: left .3s, box-shadow .3s;"></div>
+                        </div>
+                        <span id="d-label" style="font-size: 11px; font-weight: 900; letter-spacing: 3px; color: #9ca3af; transition: color .3s;">OFF</span>
+                    </div>
+                </div>
+            </button>
+        </div>
+
+        {% if produto %}
+        <div class="flex flex-wrap gap-6 pt-1">
             <label class="flex items-center gap-2 text-sm font-medium text-brand-700">
                 {{ form.ativo }} Ativo
             </label>
@@ -46,6 +84,48 @@
                 {{ form.vendido }} Vendido
             </label>
         </div>
+        {% endif %}
+    </div>
+
+    <!-- Características -->
+    <div class="bg-white rounded-2xl border border-brand-200 p-6">
+        <h2 class="font-display text-lg font-bold text-brand-800 mb-1">Características</h2>
+        <p class="text-sm text-brand-400 mb-4">Ex: Material → Crochê, Cor → Bege, Formato → Retangular</p>
+
+        {{ carac_formset.management_form }}
+
+        <div id="carac-container" class="space-y-2">
+            {% for cf in carac_formset.forms %}
+            <div class="carac-row flex items-center gap-2 flex-wrap">
+                {% for hidden in cf.hidden_fields %}{{ hidden }}{% endfor %}
+                {{ cf.chave }}
+                {{ cf.valor }}
+                {{ cf.secao }}
+                {% if cf.instance.pk %}
+                    <label class="flex items-center gap-1 text-xs text-red-500 whitespace-nowrap">
+                        {{ cf.DELETE }} Remover
+                    </label>
+                {% else %}
+                    <button type="button" class="remove-carac text-xs text-brand-400 hover:text-red-500 transition whitespace-nowrap">✕ remover</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <template id="carac-empty-form">
+            <div class="carac-row flex items-center gap-2 flex-wrap">
+                {{ carac_formset.empty_form.id }}
+                {{ carac_formset.empty_form.chave }}
+                {{ carac_formset.empty_form.valor }}
+                {{ carac_formset.empty_form.secao }}
+                <button type="button" class="remove-carac text-xs text-brand-400 hover:text-red-500 transition whitespace-nowrap">✕ remover</button>
+            </div>
+        </template>
+
+        <button type="button" id="add-carac"
+            class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-800 border border-dashed border-brand-300 hover:border-brand-500 rounded-full px-5 py-2 transition">
+            <span class="text-base leading-none">+</span> Adicionar característica
+        </button>
     </div>
 
     <div class="bg-white rounded-2xl border border-brand-200 p-6">
@@ -58,10 +138,11 @@
             </div>
         {% endif %}
 
-        <div id="imagens-container" class="space-y-4">
+        <div id="imagens-container" class="space-y-3">
             {% for imagem_form in formset.forms %}
                 <div class="imagem-row flex items-center gap-4 border border-brand-100 rounded-2xl p-4">
-                    <div class="imagem-preview shrink-0 w-16 h-16 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-300 text-xs text-center overflow-hidden">
+                    <div class="imagem-preview shrink-0 w-16 h-16 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-300 text-xs text-center overflow-hidden{% if imagem_form.instance.pk and imagem_form.instance.imagem %} cursor-pointer{% endif %}"
+                         {% if imagem_form.instance.pk and imagem_form.instance.imagem %}onclick="abrirLightbox(this)"{% endif %}>
                         {% if imagem_form.instance.pk and imagem_form.instance.imagem %}
                             <img src="{{ imagem_form.instance.imagem.url }}" alt="" class="w-full h-full object-cover">
                         {% else %}
@@ -76,11 +157,9 @@
                             {% for error in imagem_form.imagem.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
                         </div>
                         {% if imagem_form.instance.pk %}
-                            <div class="flex items-center gap-4">
-                                <label class="flex items-center gap-2 text-sm text-red-600">
-                                    {{ imagem_form.DELETE }} Remover esta imagem
-                                </label>
-                            </div>
+                            <label class="flex items-center gap-2 text-sm text-red-600">
+                                {{ imagem_form.DELETE }} Remover esta imagem
+                            </label>
                         {% else %}
                             <button type="button" class="remove-row text-sm text-brand-500 hover:text-red-600 transition">Remover</button>
                         {% endif %}
@@ -89,9 +168,10 @@
             {% endfor %}
         </div>
 
+        <!-- Template de linha vazia para JS clonar -->
         <template id="imagem-empty-form">
             <div class="imagem-row flex items-center gap-4 border border-brand-100 rounded-2xl p-4">
-                <div class="imagem-preview shrink-0 w-16 h-16 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-300 text-xs text-center overflow-hidden">
+                <div class="imagem-preview shrink-0 w-16 h-16 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-300 text-xs text-center overflow-hidden cursor-pointer" onclick="abrirLightbox(this)">
                     <span>sem foto</span>
                 </div>
                 <div class="flex-1 space-y-2">
@@ -102,59 +182,237 @@
             </div>
         </template>
 
-        <button type="button" id="add-imagem" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-800 border border-dashed border-brand-300 hover:border-brand-400 rounded-full px-4 py-2 transition">
-            <span aria-hidden="true">+</span> Adicionar mais fotos
+        <!-- Input oculto que aceita múltiplos arquivos -->
+        <input type="file" id="multi-file-input" accept="image/*" multiple class="hidden">
+
+        <button type="button" id="add-imagem"
+            class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-800 border border-dashed border-brand-300 hover:border-brand-500 rounded-full px-5 py-2.5 transition">
+            <span class="text-base leading-none">+</span> Adicionar fotos
         </button>
     </div>
 
     <script>
-        (function () {
-            var prefix = '{{ formset.prefix }}';
-            var container = document.getElementById('imagens-container');
-            var totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
-            var emptyFormHtml = document.getElementById('imagem-empty-form').innerHTML;
-            var addBtn = document.getElementById('add-imagem');
+    // ── Destaque toggle ──────────────────────────────────────────────────────
+    (function () {
+        var cb     = document.getElementById('{{ form.destaque.auto_id }}');
+        var btn    = document.getElementById('destaque-btn');
+        var topbar = document.getElementById('d-topbar');
+        var circle = document.getElementById('d-circle');
+        var star   = document.getElementById('d-star');
+        var titulo = document.getElementById('d-titulo');
+        var sub    = document.getElementById('d-sub');
+        var sw     = document.getElementById('d-switch');
+        var knob   = document.getElementById('d-knob');
+        var label  = document.getElementById('d-label');
 
-            function attachPreview(row) {
-                var input = row.querySelector('.imagem-input');
-                var preview = row.querySelector('.imagem-preview');
-                if (!input || !preview) return;
-                input.addEventListener('change', function () {
-                    var file = input.files && input.files[0];
-                    if (!file) return;
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        preview.innerHTML = '<img src="' + e.target.result + '" alt="" class="w-full h-full object-cover">';
-                    };
-                    reader.readAsDataURL(file);
-                });
+        function atualizar() {
+            if (cb.checked) {
+                btn.style.borderColor  = '#f59e0b';
+                btn.style.background   = 'linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%)';
+                btn.style.boxShadow    = '0 0 0 5px rgba(251,191,36,.22), 0 6px 20px rgba(245,158,11,.18)';
+                topbar.style.background = 'linear-gradient(90deg,#f59e0b,#fcd34d)';
+                circle.style.background = '#fef3c7';
+                circle.style.boxShadow  = '0 0 0 5px rgba(251,191,36,.28)';
+                star.style.filter      = 'none';
+                star.style.opacity     = '1';
+                star.style.transform   = 'scale(1.15) rotate(-5deg)';
+                titulo.textContent     = 'EM DESTAQUE! ⭐';
+                titulo.style.color     = '#92400e';
+                sub.textContent        = 'Aparece na página inicial ✓';
+                sub.style.color        = '#b45309';
+                sw.style.background    = '#f59e0b';
+                knob.style.left        = '40px';
+                knob.style.boxShadow   = '0 2px 8px rgba(245,158,11,.55)';
+                label.textContent      = 'ON';
+                label.style.color      = '#b45309';
+            } else {
+                btn.style.borderColor  = '#e5e7eb';
+                btn.style.background   = '#f3f4f6';
+                btn.style.boxShadow    = 'none';
+                topbar.style.background = '#d1d5db';
+                circle.style.background = '#e5e7eb';
+                circle.style.boxShadow  = 'none';
+                star.style.filter      = 'grayscale(1)';
+                star.style.opacity     = '0.35';
+                star.style.transform   = 'scale(1) rotate(0deg)';
+                titulo.textContent     = 'SEM DESTAQUE';
+                titulo.style.color     = '#9ca3af';
+                sub.textContent        = 'Produto não aparece nos destaques';
+                sub.style.color        = '#d1d5db';
+                sw.style.background    = '#d1d5db';
+                knob.style.left        = '4px';
+                knob.style.boxShadow   = '0 2px 6px rgba(0,0,0,.25)';
+                label.textContent      = 'OFF';
+                label.style.color      = '#9ca3af';
             }
+        }
 
-            function attachRemove(row) {
-                var btn = row.querySelector('.remove-row');
-                if (!btn) return;
-                btn.addEventListener('click', function () {
-                    row.remove();
-                });
+        window.alternarDestaque = function () {
+            cb.checked = !cb.checked;
+            atualizar();
+        };
+
+        atualizar();
+    })();
+
+    // ── Lightbox ─────────────────────────────────────────────────────────────
+    window.abrirLightbox = function (previewEl) {
+        var img = previewEl.querySelector('img');
+        if (!img) return;
+        document.getElementById('lightbox-img').src = img.src;
+        var lb = document.getElementById('lightbox');
+        lb.classList.remove('hidden');
+        lb.classList.add('flex');
+    };
+    window.fecharLightbox = function (e) {
+        if (e && e.target !== e.currentTarget && e.target.id !== 'lightbox') return;
+        var lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+    };
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            var lb = document.getElementById('lightbox');
+            lb.classList.add('hidden');
+            lb.classList.remove('flex');
+        }
+    });
+
+    // ── Formset de características ──────────────────────────────────────────
+    (function () {
+        var prefix = '{{ carac_formset.prefix }}';
+        var container = document.getElementById('carac-container');
+        var totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+        var emptyHtml = document.getElementById('carac-empty-form').innerHTML;
+
+        function attachRemove(row) {
+            var btn = row.querySelector('.remove-carac');
+            if (btn) btn.addEventListener('click', function () { row.remove(); });
+        }
+
+        function criarLinha(chave, secao, fixo) {
+            var idx = parseInt(totalForms.value, 10);
+            var html = emptyHtml.split('__prefix__').join(idx);
+            var wrap = document.createElement('div');
+            wrap.innerHTML = html.trim();
+            var row = wrap.firstElementChild;
+            var chaveInp = row.querySelector('input[name$="-chave"]');
+            var secaoSel = row.querySelector('select[name$="-secao"]');
+            var removeBtn = row.querySelector('.remove-carac');
+            if (chave && chaveInp) chaveInp.value = chave;
+            if (secao && secaoSel) secaoSel.value = secao;
+            if (fixo) {
+                if (chaveInp) {
+                    chaveInp.readOnly = true;
+                    chaveInp.style.cssText += ';background:#f3f4f6;color:#6b7280;cursor:default;border-color:#e5e7eb;';
+                }
+                if (secaoSel) secaoSel.style.display = 'none';
+                if (removeBtn) removeBtn.style.display = 'none';
+            } else {
+                attachRemove(row);
             }
+            container.appendChild(row);
+            totalForms.value = idx + 1;
+        }
 
-            container.querySelectorAll('.imagem-row').forEach(function (row) {
-                attachPreview(row);
-                attachRemove(row);
-            });
+        container.querySelectorAll('.carac-row').forEach(attachRemove);
 
-            addBtn.addEventListener('click', function () {
-                var index = parseInt(totalForms.value, 10);
-                var html = emptyFormHtml.split('__prefix__').join(index);
-                var wrapper = document.createElement('div');
-                wrapper.innerHTML = html.trim();
-                var row = wrapper.firstElementChild;
-                container.appendChild(row);
-                attachPreview(row);
-                attachRemove(row);
-                totalForms.value = index + 1;
+        document.getElementById('add-carac').addEventListener('click', function () {
+            criarLinha('', 'principal', false);
+        });
+
+        // Pré-preencher com campos padrão em produto novo
+        {% if not produto %}
+        if (parseInt(totalForms.value, 10) === 0) {
+            var defaults = [
+                {chave: 'Marca',            secao: 'principal'},
+                {chave: 'Cor',              secao: 'principal'},
+                {chave: 'Modelo',           secao: 'principal'},
+                {chave: 'Linha',            secao: 'principal'},
+                {chave: 'Comprimento',      secao: 'principal'},
+                {chave: 'Largura',          secao: 'principal'},
+                {chave: 'Diâmetro',         secao: 'principal'},
+                {chave: 'Formato de venda', secao: 'venda'},
+                {chave: 'Unidades por kit', secao: 'venda'},
+            ];
+            defaults.forEach(function(d) { criarLinha(d.chave, d.secao, true); });
+        }
+        {% endif %}
+    })();
+
+    // ── Formset de imagens ───────────────────────────────────────────────────
+    (function () {
+        var prefix = '{{ formset.prefix }}';
+        var container = document.getElementById('imagens-container');
+        var totalForms = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
+        var emptyFormHtml = document.getElementById('imagem-empty-form').innerHTML;
+        var addBtn = document.getElementById('add-imagem');
+        var multiInput = document.getElementById('multi-file-input');
+
+        function attachPreview(row) {
+            var input = row.querySelector('.imagem-input');
+            var preview = row.querySelector('.imagem-preview');
+            if (!input || !preview) return;
+            input.addEventListener('change', function () {
+                var file = input.files && input.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" alt="" class="w-full h-full object-cover">';
+                };
+                reader.readAsDataURL(file);
             });
-        })();
+        }
+
+        function attachRemove(row) {
+            var btn = row.querySelector('.remove-row');
+            if (!btn) return;
+            btn.addEventListener('click', function () { row.remove(); });
+        }
+
+        function criarLinha() {
+            var index = parseInt(totalForms.value, 10);
+            var html = emptyFormHtml.split('__prefix__').join(index);
+            var wrapper = document.createElement('div');
+            wrapper.innerHTML = html.trim();
+            var row = wrapper.firstElementChild;
+            container.appendChild(row);
+            attachPreview(row);
+            attachRemove(row);
+            totalForms.value = index + 1;
+            return row;
+        }
+
+        function criarLinhaComArquivo(file) {
+            var row = criarLinha();
+            var input = row.querySelector('.imagem-input');
+            var preview = row.querySelector('.imagem-preview');
+            if (!input) return;
+            // Injeta o arquivo no input via DataTransfer
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            // Atualiza preview
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                preview.innerHTML = '<img src="' + e.target.result + '" alt="" class="w-full h-full object-cover">';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        container.querySelectorAll('.imagem-row').forEach(function (row) {
+            attachPreview(row);
+            attachRemove(row);
+        });
+
+        // Botão "Adicionar fotos" abre o seletor de múltiplos arquivos
+        addBtn.addEventListener('click', function () { multiInput.click(); });
+
+        multiInput.addEventListener('change', function () {
+            Array.from(multiInput.files).forEach(criarLinhaComArquivo);
+            multiInput.value = '';
+        });
+    })();
     </script>
 
     <div class="flex flex-wrap items-center gap-3">
