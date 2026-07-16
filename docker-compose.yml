@@ -4,10 +4,10 @@ services:
     container_name: panos_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina MYSQL_ROOT_PASSWORD no .env}
       MYSQL_DATABASE: ${DB_NAME:-panoslar}
       MYSQL_USER: ${DB_USER:-panoslar}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-panoslar123}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
