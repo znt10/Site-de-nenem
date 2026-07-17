@@ -1,6 +1,11 @@
+import os
+
+from django.core.files.base import ContentFile
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+
+from .imaging import optimize_to_webp
 
 
 class Categoria(models.Model):
@@ -96,3 +101,21 @@ class ImagemProduto(models.Model):
 
     def __str__(self):
         return f'Imagem de {self.produto.nome}'
+
+    def save(self, *args, **kwargs):
+        # Otimiza só quando há upload novo (_committed=False = arquivo ainda
+        # não gravado no storage), evitando baixar/reprocessar o que já está
+        # no MinIO a cada save.
+        if self.imagem and not self.imagem._committed:
+            try:
+                webp = optimize_to_webp(self.imagem)
+                base = os.path.splitext(os.path.basename(self.imagem.name))[0] + '.webp'
+                # save=False: grava o WebP no storage sem salvar o model ainda;
+                # o super().save() abaixo persiste a linha. Assim o original
+                # nunca chega ao MinIO — só a versão otimizada.
+                self.imagem.save(base, ContentFile(webp), save=False)
+            except Exception:
+                # Falha na otimização não pode perder a imagem: segue o fluxo
+                # normal e grava o original.
+                pass
+        super().save(*args, **kwargs)
